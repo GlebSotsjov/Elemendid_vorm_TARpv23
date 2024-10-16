@@ -6,7 +6,6 @@ using System.Windows.Forms;
 
 namespace Elemendid_vorm_TARpv23
 {
-    
     public partial class KolmasVorm : Form
     {
         List<int> numbers = new List<int> { 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6 };
@@ -22,6 +21,11 @@ namespace Elemendid_vorm_TARpv23
         int totalTime = 60;
         int countDownTime;
         bool gameOver = false;
+
+        Button btnRestart;
+        Button btnCheckAnswers; // Кнопка для проверки ответов
+        int matches = 0;
+        Label lblMatched;
 
         public KolmasVorm(int width, int height) // Конструктор с параметрами
         {
@@ -44,9 +48,13 @@ namespace Elemendid_vorm_TARpv23
             this.Controls.Add(lblStatus);
             this.Controls.Add(lblTimeLeft);
 
+            // Добавляем кнопку Restart, кнопку для проверки ответов и счетчик совпадений
+            AddRestartButton();
+            AddCheckAnswersButton(); // Добавляем кнопку для проверки ответов
+            AddMatchedLabel();
+
             LoadPictures(); // Загружаем картинки
         }
-
 
         private void TimerEvent(object sender, EventArgs e)
         {
@@ -130,9 +138,7 @@ namespace Elemendid_vorm_TARpv23
 
         private void RestartGame()
         {
-            // Перемешиваем оригинальный список
             var randomList = numbers.OrderBy(x => Guid.NewGuid()).ToList();
-            // Назначаем перемешанный список оригинальному
             numbers = randomList;
             for (int i = 0; i < pictures.Count; i++)
             {
@@ -140,11 +146,84 @@ namespace Elemendid_vorm_TARpv23
                 pictures[i].Tag = numbers[i].ToString();
             }
             tries = 0;
+            matches = 0; // Обнуляем количество совпадений
             lblStatus.Text = "Mismatched: " + tries + " times.";
+            lblMatched.Text = "Matched: 0 pairs";
             lblTimeLeft.Text = "Time Left: " + totalTime;
             gameOver = false;
             countDownTime = totalTime;
             GameTimer.Start(); // Запуск таймера
+        }
+
+        private void AddRestartButton()
+        {
+            btnRestart = new Button();
+            btnRestart.Text = "Restart";
+            btnRestart.Size = new Size(100, 30);
+            btnRestart.Location = new Point(300, 400); // Размести кнопку рядом с таймером
+            btnRestart.Click += btnRestart_Click;
+            this.Controls.Add(btnRestart);
+        }
+
+        private void btnRestart_Click(object sender, EventArgs e)
+        {
+            RestartGame(); // Перезапуск игры
+        }
+
+        private void AddCheckAnswersButton()
+        {
+            btnCheckAnswers = new Button
+            {
+                Text = "Check Answers",
+                Size = new Size(120, 30),
+                Location = new Point(420, 400) // Размести кнопку рядом с кнопкой перезапуска
+            };
+            btnCheckAnswers.Click += CheckAnswersButton_Click;
+            this.Controls.Add(btnCheckAnswers);
+        }
+
+        private void CheckAnswersButton_Click(object sender, EventArgs e)
+        {
+            // Проверяем, решены ли все элементы
+            if (pictures.All(o => o.Tag == null))
+            {
+                GameOver("Great Work, You Win!!!!");
+            }
+            else
+            {
+                MessageBox.Show("There are still unmatched pairs!", "Check Answers", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void AddMatchedLabel()
+        {
+            lblMatched = new Label
+            {
+                Text = "Matched: 0 pairs",
+                Location = new Point(20, 260),
+                Size = new Size(200, 30)
+            };
+            this.Controls.Add(lblMatched);
+        }
+
+        private void UpdateMatchedLabel()
+        {
+            matches++;
+            lblMatched.Text = "Matched: " + matches + " pairs";
+        }
+
+        private void ShowResultsTable()
+        {
+            string message = $"Game Over! Results:\nMismatched: {tries} times\nMatched: {matches} pairs\nTime Left: {countDownTime} seconds";
+            MessageBox.Show(message, "Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void GameOver(string msg)
+        {
+            GameTimer.Stop(); // Остановка таймера
+            gameOver = true; // Игра окончена
+
+            ShowResultsTable(); // Показываем таблицу результатов
         }
 
         private void CheckPictures(PictureBox A, PictureBox B)
@@ -153,6 +232,7 @@ namespace Elemendid_vorm_TARpv23
             {
                 A.Tag = null;
                 B.Tag = null;
+                UpdateMatchedLabel(); // Увеличиваем счетчик совпадений
             }
             else
             {
@@ -173,13 +253,6 @@ namespace Elemendid_vorm_TARpv23
             {
                 GameOver("Great Work, You Win!!!!");
             }
-        }
-
-        private void GameOver(string msg)
-        {
-            GameTimer.Stop(); // Остановка таймера
-            gameOver = true; // Игра окончена
-            MessageBox.Show(msg + " Click Restart to Play Again.", "Gleb Says: ");
         }
     }
 }
