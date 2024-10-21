@@ -23,37 +23,39 @@ namespace Elemendid_vorm_TARpv23
         bool gameOver = false;
 
         Button btnRestart;
-        Button btnCheckAnswers; // Кнопка для проверки ответов
+        Button btnCheckAnswers;
+        Button btnZoom; // Кнопка Zoom
         int matches = 0;
         Label lblMatched;
+        bool isZoomed = false; // Для отслеживания состояния Zoom
 
         public KolmasVorm(int width, int height) // Конструктор с параметрами
         {
-            InitializeComponent(); // Инициализация компонентов
-            this.ClientSize = new Size(width, height); // Устанавливаем размер окна
-            GameTimer = new System.Windows.Forms.Timer(); // Инициализация таймера
-            GameTimer.Interval = 1000; // Установка интервала в 1 секунду
-            GameTimer.Tick += TimerEvent; // Подписка на событие таймера
+            InitializeComponent();
+            this.ClientSize = new Size(800, 600);
+            GameTimer = new System.Windows.Forms.Timer();
+            GameTimer.Interval = 1000;
+            GameTimer.Tick += TimerEvent;
 
             lblStatus = new Label
             {
-                Location = new Point(20, 200),
+                Location = new Point(20, 400),
                 Size = new Size(200, 30)
             };
             lblTimeLeft = new Label
             {
-                Location = new Point(20, 230),
+                Location = new Point(20, 430),
                 Size = new Size(200, 30)
             };
             this.Controls.Add(lblStatus);
             this.Controls.Add(lblTimeLeft);
 
-            // Добавляем кнопку Restart, кнопку для проверки ответов и счетчик совпадений
             AddRestartButton();
-            AddCheckAnswersButton(); // Добавляем кнопку для проверки ответов
+            AddCheckAnswersButton();
             AddMatchedLabel();
+            AddZoomButton(); // Добавляем кнопку Zoom
 
-            LoadPictures(); // Загружаем картинки
+            LoadPictures();
         }
 
         private void TimerEvent(object sender, EventArgs e)
@@ -107,11 +109,8 @@ namespace Elemendid_vorm_TARpv23
 
         private void NewPic_Click(object sender, EventArgs e)
         {
-            if (gameOver)
-            {
-                // Не регистрировать клик, если игра окончена
-                return;
-            }
+            if (gameOver) return;
+
             if (firstChoice == null)
             {
                 picA = sender as PictureBox;
@@ -146,13 +145,13 @@ namespace Elemendid_vorm_TARpv23
                 pictures[i].Tag = numbers[i].ToString();
             }
             tries = 0;
-            matches = 0; // Обнуляем количество совпадений
+            matches = 0;
             lblStatus.Text = "Mismatched: " + tries + " times.";
             lblMatched.Text = "Matched: 0 pairs";
             lblTimeLeft.Text = "Time Left: " + totalTime;
             gameOver = false;
             countDownTime = totalTime;
-            GameTimer.Start(); // Запуск таймера
+            GameTimer.Start();
         }
 
         private void AddRestartButton()
@@ -160,14 +159,14 @@ namespace Elemendid_vorm_TARpv23
             btnRestart = new Button();
             btnRestart.Text = "Restart";
             btnRestart.Size = new Size(100, 30);
-            btnRestart.Location = new Point(300, 400); // Размести кнопку рядом с таймером
+            btnRestart.Location = new Point(300, 400);
             btnRestart.Click += btnRestart_Click;
             this.Controls.Add(btnRestart);
         }
 
         private void btnRestart_Click(object sender, EventArgs e)
         {
-            RestartGame(); // Перезапуск игры
+            RestartGame();
         }
 
         private void AddCheckAnswersButton()
@@ -176,7 +175,7 @@ namespace Elemendid_vorm_TARpv23
             {
                 Text = "Check Answers",
                 Size = new Size(120, 30),
-                Location = new Point(420, 400) // Размести кнопку рядом с кнопкой перезапуска
+                Location = new Point(420, 400)
             };
             btnCheckAnswers.Click += CheckAnswersButton_Click;
             this.Controls.Add(btnCheckAnswers);
@@ -184,7 +183,6 @@ namespace Elemendid_vorm_TARpv23
 
         private void CheckAnswersButton_Click(object sender, EventArgs e)
         {
-            // Проверяем, решены ли все элементы
             if (pictures.All(o => o.Tag == null))
             {
                 GameOver("Great Work, You Win!!!!");
@@ -200,7 +198,7 @@ namespace Elemendid_vorm_TARpv23
             lblMatched = new Label
             {
                 Text = "Matched: 0 pairs",
-                Location = new Point(20, 260),
+                Location = new Point(20, 460),
                 Size = new Size(200, 30)
             };
             this.Controls.Add(lblMatched);
@@ -220,10 +218,9 @@ namespace Elemendid_vorm_TARpv23
 
         private void GameOver(string msg)
         {
-            GameTimer.Stop(); // Остановка таймера
-            gameOver = true; // Игра окончена
-
-            ShowResultsTable(); // Показываем таблицу результатов
+            GameTimer.Stop();
+            gameOver = true;
+            ShowResultsTable();
         }
 
         private void CheckPictures(PictureBox A, PictureBox B)
@@ -232,7 +229,7 @@ namespace Elemendid_vorm_TARpv23
             {
                 A.Tag = null;
                 B.Tag = null;
-                UpdateMatchedLabel(); // Увеличиваем счетчик совпадений
+                UpdateMatchedLabel();
             }
             else
             {
@@ -248,10 +245,77 @@ namespace Elemendid_vorm_TARpv23
                     pics.Image = null;
                 }
             }
-            // Проверяем, решены ли все элементы
             if (pictures.All(o => o.Tag == null))
             {
                 GameOver("Great Work, You Win!!!!");
+            }
+        }
+
+        private void AddZoomButton()
+        {
+            btnZoom = new Button();
+            btnZoom.Text = "Zoom";
+            btnZoom.Size = new Size(100, 30);
+            btnZoom.Location = new Point(540, 400); // Размещаем рядом с другими кнопками
+            btnZoom.Click += btnZoom_Click;
+            this.Controls.Add(btnZoom);
+        }
+
+        private void btnZoom_Click(object sender, EventArgs e)
+        {
+            if (!isZoomed)
+            {
+                ZoomIn();
+                btnZoom.Text = "Unzoom";
+            }
+            else
+            {
+                ZoomOut();
+                btnZoom.Text = "Zoom";
+            }
+            isZoomed = !isZoomed;
+        }
+
+        private void ZoomIn()
+        {
+            foreach (PictureBox pic in pictures)
+            {
+                pic.Width = 100;
+                pic.Height = 100;
+            }
+            ArrangePictures(100, 100, 120);
+        }
+
+        private void ZoomOut()
+        {
+            foreach (PictureBox pic in pictures)
+            {
+                pic.Width = 50;
+                pic.Height = 50;
+            }
+            ArrangePictures(50, 50, 60);
+        }
+
+        private void ArrangePictures(int picWidth, int picHeight, int step)
+        {
+            int leftPos = 20;
+            int topPos = 20;
+            int rows = 0;
+            foreach (PictureBox pic in pictures)
+            {
+                if (rows < 4)
+                {
+                    rows++;
+                    pic.Left = leftPos;
+                    pic.Top = topPos;
+                    leftPos += step;
+                }
+                if (rows == 4)
+                {
+                    leftPos = 20;
+                    topPos += step;
+                    rows = 0;
+                }
             }
         }
     }
