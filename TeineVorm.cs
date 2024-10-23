@@ -20,10 +20,10 @@ namespace Elemendid_vorm_TARpv23
         {
             this.Height = h;
             this.Width = w;
-            this.Text = "Math Quiz";
+            this.Text = "Matemaatika Viktoriin";
 
             timeLabel = new Label();
-            timeLabel.Text = "Time Left";
+            timeLabel.Text = "Aega Jäänud";
             timeLabel.Font = new Font("Arial", 20, FontStyle.Bold);
             timeLabel.Size = new Size(200, 50);
             timeLabel.Location = new Point(50, 20);
@@ -36,7 +36,7 @@ namespace Elemendid_vorm_TARpv23
 
             // Start button
             startButton = new Button();
-            startButton.Text = "Start Quiz";
+            startButton.Text = "Alusta Viktoriini";
             startButton.Size = new Size(100, 50);
             startButton.Location = new Point(200, 400);
             startButton.Click += new EventHandler(StartButton_Click);
@@ -44,7 +44,7 @@ namespace Elemendid_vorm_TARpv23
 
             // Reset button
             resetButton = new Button();
-            resetButton.Text = "Reset Quiz";
+            resetButton.Text = "Lähtesta Viktoriin";
             resetButton.Size = new Size(100, 50);
             resetButton.Location = new Point(320, 400);
             resetButton.Click += new EventHandler(ResetButton_Click);
@@ -52,7 +52,7 @@ namespace Elemendid_vorm_TARpv23
 
             // Hint button
             hintButton = new Button();
-            hintButton.Text = "Show Hints";
+            hintButton.Text = "Näita Vihjeid";
             hintButton.Size = new Size(100, 50);
             hintButton.Location = new Point(440, 400);
             hintButton.Click += new EventHandler(HintButton_Click);
@@ -60,7 +60,7 @@ namespace Elemendid_vorm_TARpv23
 
             // Submit button for early answer submission
             submitButton = new Button();
-            submitButton.Text = "Submit Answers";
+            submitButton.Text = "Esita Vastused";
             submitButton.Size = new Size(150, 50);
             submitButton.Location = new Point(560, 400);
             submitButton.Click += new EventHandler(SubmitButton_Click);
@@ -98,7 +98,7 @@ namespace Elemendid_vorm_TARpv23
             answerBox = new NumericUpDown();
             answerBox.Size = new Size(100, 50);
             answerBox.Location = new Point(x + 200, y);
-            answerBox.Maximum = 1000; // Установите максимальное значение 1000
+            answerBox.Maximum = 1000;
             Controls.Add(answerBox);
         }
 
@@ -126,17 +126,16 @@ namespace Elemendid_vorm_TARpv23
             if (timeLeft > 0)
             {
                 timeLeft--;
-                timeLabel.Text = "Time Left: " + timeLeft + " seconds";
+                timeLabel.Text = "Aega Jäänud: " + timeLeft + " sekundit";
             }
             else
             {
                 quizTime.Stop();
-                MessageBox.Show("Time's up!");
+                MessageBox.Show("Aeg on läbi!");
                 CheckAnswers();
             }
         }
 
-        // Function 1: Check answers
         private void CheckAnswers()
         {
             int correctAnswers = 0;
@@ -153,10 +152,9 @@ namespace Elemendid_vorm_TARpv23
             if (quotient.Value == (int.Parse(dividedLeftLabel.Text) / int.Parse(dividedRightLabel.Text)))
                 correctAnswers++;
 
-            MessageBox.Show($"You got {correctAnswers} correct out of 4!");
+            MessageBox.Show($"Sul on {correctAnswers} õiget vastust neljast!");
         }
 
-        // Function 2: Reset quiz
         private void ResetButton_Click(object sender, EventArgs e)
         {
             ResetQuiz();
@@ -172,18 +170,16 @@ namespace Elemendid_vorm_TARpv23
             plusLeftLabel.Text = "?";
             plusRightLabel.Text = "?";
             minusLeftLabel.Text = "?";
-            minusRightLabel.Text = "?";
             timesLeftLabel.Text = "?";
             timesRightLabel.Text = "?";
             dividedLeftLabel.Text = "?";
             dividedRightLabel.Text = "?";
 
-            timeLabel.Text = "Time Left: 30 seconds";
+            timeLabel.Text = "Aega Jäänud: 30 sekundit";
             timeLeft = 30;
-            quizTime.Stop(); // Остановить таймер, если викторина сбрасывается
+            quizTime.Stop();
         }
 
-        // Function 3: Show hints
         private void HintButton_Click(object sender, EventArgs e)
         {
             ShowHints();
@@ -191,17 +187,16 @@ namespace Elemendid_vorm_TARpv23
 
         private void ShowHints()
         {
-            MessageBox.Show($"Sum: {int.Parse(plusLeftLabel.Text) + int.Parse(plusRightLabel.Text)}\n" +
-                            $"Difference: {int.Parse(minusLeftLabel.Text) - int.Parse(minusRightLabel.Text)}\n" +
-                            $"Product: {int.Parse(timesLeftLabel.Text) * int.Parse(timesRightLabel.Text)}\n" +
-                            $"Quotient: {int.Parse(dividedLeftLabel.Text) / int.Parse(dividedRightLabel.Text)}");
+            MessageBox.Show($"Summa: {int.Parse(plusLeftLabel.Text) + int.Parse(plusRightLabel.Text)}\n" +
+                            $"Vahe: {int.Parse(minusLeftLabel.Text) - int.Parse(minusRightLabel.Text)}\n" +
+                            $"Korrutis: {int.Parse(timesLeftLabel.Text) * int.Parse(timesRightLabel.Text)}\n" +
+                            $"Jagatis: {int.Parse(dividedLeftLabel.Text) / int.Parse(dividedRightLabel.Text)}");
         }
 
-        // Function 4: Early submission of answers
         private void SubmitButton_Click(object sender, EventArgs e)
         {
-            quizTime.Stop();  // Остановим таймер
-            CheckAnswers();    // Выполним проверку ответов
+            quizTime.Stop();
+            CheckAnswers();
         }
     }
 }
