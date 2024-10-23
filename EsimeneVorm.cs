@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -8,10 +9,12 @@ namespace Elemendid_vorm_TARpv23
 {
     public partial class EsimeneVorm : Form
     {
-        Button btn;
-        Button btn2;
-        Button btn3;
-        Button btn4;
+        Button btnClose;
+        Button btnShowPicture;
+        Button btnClearPicture;
+        Button btnSetBackground;
+        Button btnRotate;
+        Button btnBlackAndWhite;
         PictureBox pb1 = new PictureBox();
         ColorDialog cd1 = new ColorDialog();
         System.Windows.Forms.CheckBox chk1;
@@ -29,83 +32,124 @@ namespace Elemendid_vorm_TARpv23
             this.Width = w;
             this.Text = "Esimene vorm";
 
-            // Создание и добавление кнопок
-            btn = new Button();
-            btn.Text = "Close";
-            btn.Location = new Point(300, 440);
-            btn.Click += closeButton_Click;
-            Controls.Add(btn);
+            // Создаем PictureBox
+            pb1.SizeMode = PictureBoxSizeMode.Normal;
+            pb1.Location = new Point(20, 20);
+            pb1.Size = new Size(400, 300); // Размер по умолчанию
+            this.Controls.Add(pb1);
 
-            btn2 = new Button();
-            btn2.Text = "Show picture";
-            btn2.Location = new Point(375, 440);
-            btn2.Click += Click_ShowPictureButton;
-            Controls.Add(btn2);
+            // Создаем кнопки
+            btnClose = new Button();
+            btnClose.Text = "Sulge";
+            btnClose.Click += closeButton_Click;
+            Controls.Add(btnClose);
 
-            btn3 = new Button();
-            btn3.Text = "Clear Picture";
-            btn3.Location = new Point(450, 440);
-            btn3.Click += clearButton_Click;
-            Controls.Add(btn3);
+            btnShowPicture = new Button();
+            btnShowPicture.Text = "Näita pilti";
+            btnShowPicture.Click += Click_ShowPictureButton;
+            Controls.Add(btnShowPicture);
 
-            btn4 = new Button();
-            btn4.Text = "Set the background color";
-            btn4.Location = new Point(525, 440);
-            btn4.Click += backgroundButton_Click;
-            Controls.Add(btn4);
+            btnClearPicture = new Button();
+            btnClearPicture.Text = "Puhasta pilt";
+            btnClearPicture.Click += clearButton_Click;
+            Controls.Add(btnClearPicture);
+
+            btnSetBackground = new Button();
+            btnSetBackground.Text = "Määra taustavärv";
+            btnSetBackground.Click += backgroundButton_Click;
+            Controls.Add(btnSetBackground);
+
+            btnRotate = new Button();
+            btnRotate.Text = "Pööra 90°";
+            btnRotate.Click += btnRotate_Click;
+            Controls.Add(btnRotate);
+
+            btnBlackAndWhite = new Button();
+            btnBlackAndWhite.Text = "Must/Valge";
+            btnBlackAndWhite.Click += btnBlackAndWhite_Click;
+            Controls.Add(btnBlackAndWhite);
 
             // CheckBox
             chk1 = new System.Windows.Forms.CheckBox();
             chk1.Checked = false;
-            chk1.Text = "Stretch";
-            chk1.Size = new Size(75, 20);
-            chk1.Location = new Point(20, 440);
+            chk1.Text = "Venita";
             chk1.Click += checkBox1_CheckedChanged;
             Controls.Add(chk1);
 
-            // Добавляем функции изменения изображения и слайдшоу
+            // Добавляем функцию изменения изображения
             AddChangePictureButton();
-            AddImageSlideshowFunctionality();
             AddTimeDisplayFunctionality();
+
+            // Располагаем кнопки под изображением
+            UpdateButtonPositions();
         }
 
-        // Добавление кнопки изменения изображения
         private void AddChangePictureButton()
         {
             btnChangePicture = new Button();
-            btnChangePicture.Text = "Change Picture";
-            btnChangePicture.Location = new Point(700, 440);
+            btnChangePicture.Text = "Vaheta pilti";
             btnChangePicture.Click += btnChangePicture_Click;
             Controls.Add(btnChangePicture);
         }
 
         private void btnChangePicture_Click(object sender, EventArgs e)
         {
-            ofd.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp";
+            ofd.Filter = "Pildifailid|*.jpg;*.jpeg;*.png;*.bmp";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 pb1.Image = Image.FromFile(ofd.FileName);
+                UpdateButtonPositions(); // Обновляем позиции кнопок после загрузки изображения
             }
         }
 
-        // Добавление функции слайд-шоу
-        private void AddImageSlideshowFunctionality()
+        // Функция для обновления расположения кнопок под изображением
+        private void UpdateButtonPositions()
         {
-            timer.Interval = 3000; // Интервал 3 секунды
-            timer.Tick += timer_Tick;
-            timer.Start();
+            int btnY = pb1.Bottom + 10; // Положение кнопок под изображением
+
+            // Располагаем кнопки
+            btnShowPicture.Location = new Point(pb1.Left, btnY);
+            btnClearPicture.Location = new Point(btnShowPicture.Right + 10, btnY);
+            btnSetBackground.Location = new Point(btnClearPicture.Right + 10, btnY);
+            btnRotate.Location = new Point(btnSetBackground.Right + 10, btnY);
+            btnBlackAndWhite.Location = new Point(btnRotate.Right + 10, btnY);
+            btnChangePicture.Location = new Point(btnBlackAndWhite.Right + 10, btnY);
+            btnClose.Location = new Point(btnChangePicture.Right + 10, btnY);
+
+            // CheckBox
+            chk1.Location = new Point(pb1.Left, btnY + 40);
         }
 
-        private void timer_Tick(object sender, EventArgs e)
+        private void btnRotate_Click(object sender, EventArgs e)
         {
-            if (imageFiles.Count > 0)
+            if (pb1.Image != null)
             {
-                pb1.Image = Image.FromFile(imageFiles[currentImageIndex]);
-                currentImageIndex = (currentImageIndex + 1) % imageFiles.Count;
+                pb1.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+                pb1.Refresh();
+                UpdateButtonPositions(); // Обновляем позиции кнопок после поворота
             }
         }
 
-        // Отображение текущего времени
+        private void btnBlackAndWhite_Click(object sender, EventArgs e)
+        {
+            if (pb1.Image != null)
+            {
+                Bitmap bmp = new Bitmap(pb1.Image);
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    for (int x = 0; x < bmp.Width; x++)
+                    {
+                        Color pixelColor = bmp.GetPixel(x, y);
+                        int grayScale = (int)((pixelColor.R * 0.3) + (pixelColor.G * 0.59) + (pixelColor.B * 0.11));
+                        Color grayColor = Color.FromArgb(grayScale, grayScale, grayScale);
+                        bmp.SetPixel(x, y, grayColor);
+                    }
+                }
+                pb1.Image = bmp;
+                UpdateButtonPositions(); // Обновляем позиции кнопок после изменения изображения
+            }
+        }
+
         private void AddTimeDisplayFunctionality()
         {
             lblTime = new Label();
@@ -125,13 +169,12 @@ namespace Elemendid_vorm_TARpv23
             lblTime.Text = DateTime.Now.ToString("HH:mm:ss");
         }
 
-        // Кнопка "Clear Picture"
         private void clearButton_Click(object sender, EventArgs e)
         {
             pb1.Image = null;
+            UpdateButtonPositions(); // Обновляем позиции кнопок после очистки изображения
         }
 
-        // Установка фона
         private void backgroundButton_Click(object sender, EventArgs e)
         {
             if (cd1.ShowDialog() == DialogResult.OK)
@@ -140,28 +183,24 @@ namespace Elemendid_vorm_TARpv23
             }
         }
 
-        // Закрытие формы
         private void closeButton_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        // Показать картинку
         private void Click_ShowPictureButton(object? sender, EventArgs e)
         {
             pb1.Image = Image.FromFile(@"..\..\..\picture.jpg");
-            pb1.Location = new Point(0, 0);
-            pb1.Size = new Size(800, 900);
-            this.Controls.Add(pb1);
+            UpdateButtonPositions(); // Обновляем позиции кнопок после загрузки изображения
         }
 
-        // Изменение режима отображения картинки
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (chk1.Checked)
                 pb1.SizeMode = PictureBoxSizeMode.StretchImage;
             else
                 pb1.SizeMode = PictureBoxSizeMode.Normal;
+            UpdateButtonPositions(); // Обновляем позиции кнопок после изменения режима
         }
     }
 }
