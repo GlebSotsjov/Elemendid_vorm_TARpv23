@@ -24,12 +24,12 @@ namespace Elemendid_vorm_TARpv23
 
         Button btnRestart;
         Button btnCheckAnswers;
-        Button btnZoom; // Кнопка Zoom
+        Button btnZoom;
         int matches = 0;
         Label lblMatched;
-        bool isZoomed = false; // Для отслеживания состояния Zoom
+        bool isZoomed = false;
 
-        public KolmasVorm(int width, int height) // Конструктор с параметрами
+        public KolmasVorm(int width, int height)
         {
             InitializeComponent();
             this.ClientSize = new Size(800, 600);
@@ -53,18 +53,85 @@ namespace Elemendid_vorm_TARpv23
             AddRestartButton();
             AddCheckAnswersButton();
             AddMatchedLabel();
-            AddZoomButton(); // Добавляем кнопку Zoom
+            AddZoomButton();
 
             LoadPictures();
+        }
+
+        private void AddRestartButton()
+        {
+            btnRestart = new Button();
+            btnRestart.Text = "Alusta uuesti"; 
+            btnRestart.Size = new Size(100, 30);
+            btnRestart.Location = new Point(250, 400); 
+            btnRestart.Click += btnRestart_Click;
+            this.Controls.Add(btnRestart);
+        }
+
+        private void AddCheckAnswersButton()
+        {
+            btnCheckAnswers = new Button
+            {
+                Text = "Kontrolli vastuseid", 
+                Size = new Size(120, 30),
+                Location = new Point(360, 400) 
+            };
+            btnCheckAnswers.Click += CheckAnswersButton_Click;
+            this.Controls.Add(btnCheckAnswers);
+        }
+
+        private void AddZoomButton()
+        {
+            btnZoom = new Button();
+            btnZoom.Text = "Suurenda"; 
+            btnZoom.Size = new Size(100, 30);
+            btnZoom.Location = new Point(490, 400); 
+            btnZoom.Click += btnZoom_Click;
+            this.Controls.Add(btnZoom);
+        }
+
+        private void Btn_MouseEnter(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            if (btn != null)
+            {
+                btn.BackColor = Color.LightBlue;
+            }
+        }
+
+        private void Btn_MouseLeave(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            if (btn != null)
+            {
+                btn.BackColor = Color.LightGray;
+            }
+        }
+
+        private void btnRestart_Click(object sender, EventArgs e)
+        {
+            RestartGame();
+        }
+
+        private void CheckAnswersButton_Click(object sender, EventArgs e)
+        {
+            if (pictures.All(o => o.Tag == null))
+            {
+                GameOver("Suurepärane töö, sa võitsid!!!!"); // Перевод: "Great Work, You Win!!!!"
+            }
+            else
+            {
+                MessageBox.Show("On veel paarimata pilte!", "Kontrolli vastuseid", MessageBoxButtons.OK, MessageBoxIcon.Information); // Перевод: "There are still unmatched pairs!"
+            }
         }
 
         private void TimerEvent(object sender, EventArgs e)
         {
             countDownTime--;
-            lblTimeLeft.Text = "Time Left: " + countDownTime;
+            lblTimeLeft.Text = "Järelejäänud aeg: " + countDownTime; // Перевод: "Time Left:"
             if (countDownTime < 1)
             {
-                GameOver("Time's Up, You Lose");
+                GameOver("Aeg on läbi, sa kaotasid"); // Перевод: "Time's Up, You Lose"
                 foreach (PictureBox x in pictures)
                 {
                     if (x.Tag != null)
@@ -85,7 +152,7 @@ namespace Elemendid_vorm_TARpv23
                 PictureBox newPic = new PictureBox();
                 newPic.Height = 50;
                 newPic.Width = 50;
-                newPic.BackColor = Color.LightGray;
+                newPic.BackColor = Color.Pink; // Изменено на розовый цвет
                 newPic.SizeMode = PictureBoxSizeMode.StretchImage;
                 newPic.Click += NewPic_Click;
                 pictures.Add(newPic);
@@ -105,6 +172,32 @@ namespace Elemendid_vorm_TARpv23
                 }
             }
             RestartGame();
+        }
+
+        private void RestartGame()
+        {
+            var randomList = numbers.OrderBy(x => Guid.NewGuid()).ToList();
+            numbers = randomList;
+            for (int i = 0; i < pictures.Count; i++)
+            {
+                pictures[i].Image = null;
+                pictures[i].Tag = numbers[i].ToString();
+            }
+            tries = 0;
+            matches = 0;
+            lblStatus.Text = "Väärad valikud: " + tries + " korda."; // Перевод: "Mismatched times"
+            lblMatched.Text = "Paaritatud: 0 paari"; // Перевод: "Matched: 0 pairs"
+            lblTimeLeft.Text = "Järelejäänud aeg: " + totalTime; // Перевод: "Time Left:"
+            gameOver = false;
+            countDownTime = totalTime;
+            GameTimer.Start();
+        }
+
+        private void GameOver(string msg)
+        {
+            GameTimer.Stop();
+            gameOver = true;
+            MessageBox.Show(msg, "Mäng läbi", MessageBoxButtons.OK, MessageBoxIcon.Information); // Перевод: "Game Over"
         }
 
         private void NewPic_Click(object sender, EventArgs e)
@@ -135,106 +228,19 @@ namespace Elemendid_vorm_TARpv23
             }
         }
 
-        private void RestartGame()
-        {
-            var randomList = numbers.OrderBy(x => Guid.NewGuid()).ToList();
-            numbers = randomList;
-            for (int i = 0; i < pictures.Count; i++)
-            {
-                pictures[i].Image = null;
-                pictures[i].Tag = numbers[i].ToString();
-            }
-            tries = 0;
-            matches = 0;
-            lblStatus.Text = "Mismatched: " + tries + " times.";
-            lblMatched.Text = "Matched: 0 pairs";
-            lblTimeLeft.Text = "Time Left: " + totalTime;
-            gameOver = false;
-            countDownTime = totalTime;
-            GameTimer.Start();
-        }
-
-        private void AddRestartButton()
-        {
-            btnRestart = new Button();
-            btnRestart.Text = "Restart";
-            btnRestart.Size = new Size(100, 30);
-            btnRestart.Location = new Point(300, 400);
-            btnRestart.Click += btnRestart_Click;
-            this.Controls.Add(btnRestart);
-        }
-
-        private void btnRestart_Click(object sender, EventArgs e)
-        {
-            RestartGame();
-        }
-
-        private void AddCheckAnswersButton()
-        {
-            btnCheckAnswers = new Button
-            {
-                Text = "Check Answers",
-                Size = new Size(120, 30),
-                Location = new Point(420, 400)
-            };
-            btnCheckAnswers.Click += CheckAnswersButton_Click;
-            this.Controls.Add(btnCheckAnswers);
-        }
-
-        private void CheckAnswersButton_Click(object sender, EventArgs e)
-        {
-            if (pictures.All(o => o.Tag == null))
-            {
-                GameOver("Great Work, You Win!!!!");
-            }
-            else
-            {
-                MessageBox.Show("There are still unmatched pairs!", "Check Answers", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
-        private void AddMatchedLabel()
-        {
-            lblMatched = new Label
-            {
-                Text = "Matched: 0 pairs",
-                Location = new Point(20, 460),
-                Size = new Size(200, 30)
-            };
-            this.Controls.Add(lblMatched);
-        }
-
-        private void UpdateMatchedLabel()
-        {
-            matches++;
-            lblMatched.Text = "Matched: " + matches + " pairs";
-        }
-
-        private void ShowResultsTable()
-        {
-            string message = $"Game Over! Results:\nMismatched: {tries} times\nMatched: {matches} pairs\nTime Left: {countDownTime} seconds";
-            MessageBox.Show(message, "Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void GameOver(string msg)
-        {
-            GameTimer.Stop();
-            gameOver = true;
-            ShowResultsTable();
-        }
-
         private void CheckPictures(PictureBox A, PictureBox B)
         {
             if (firstChoice == secondChoice)
             {
                 A.Tag = null;
                 B.Tag = null;
-                UpdateMatchedLabel();
+                matches++;
+                lblMatched.Text = "Paaritatud: " + matches + " paari"; // Перевод: "Matched"
             }
             else
             {
                 tries++;
-                lblStatus.Text = "Mismatched " + tries + " times.";
+                lblStatus.Text = "Väärad valikud " + tries + " korda."; // Перевод: "Mismatched"
             }
             firstChoice = null;
             secondChoice = null;
@@ -247,18 +253,19 @@ namespace Elemendid_vorm_TARpv23
             }
             if (pictures.All(o => o.Tag == null))
             {
-                GameOver("Great Work, You Win!!!!");
+                GameOver("Suurepärane töö, sa võitsid!!!!"); // Перевод: "Great Work, You Win!!!!"
             }
         }
 
-        private void AddZoomButton()
+        private void AddMatchedLabel()
         {
-            btnZoom = new Button();
-            btnZoom.Text = "Zoom";
-            btnZoom.Size = new Size(100, 30);
-            btnZoom.Location = new Point(540, 400); // Размещаем рядом с другими кнопками
-            btnZoom.Click += btnZoom_Click;
-            this.Controls.Add(btnZoom);
+            lblMatched = new Label
+            {
+                Text = "Paaritatud: 0 paari", // Перевод: "Matched: 0 pairs"
+                Location = new Point(20, 460),
+                Size = new Size(200, 30)
+            };
+            this.Controls.Add(lblMatched);
         }
 
         private void btnZoom_Click(object sender, EventArgs e)
@@ -266,12 +273,12 @@ namespace Elemendid_vorm_TARpv23
             if (!isZoomed)
             {
                 ZoomIn();
-                btnZoom.Text = "Unzoom";
+                btnZoom.Text = "Vähenda"; 
             }
             else
             {
                 ZoomOut();
-                btnZoom.Text = "Zoom";
+                btnZoom.Text = "Suurenda"; 
             }
             isZoomed = !isZoomed;
         }
